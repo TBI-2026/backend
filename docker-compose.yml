@@ -1,10 +1,14 @@
 version: '3.8'
 
 services:
-  fondasikehidupan:
-    image: fondasikehidupan:latest
-    container_name: fondasikehidupan
-    ports:
-      - "127.0.0.1:8081:8080"
+  backend:
+    image: backend:latest
+    container_name: backend
     env_file:
       - .env
+    networks:
+      - internal-network
+
+networks:
+  internal-network:
+    external: true

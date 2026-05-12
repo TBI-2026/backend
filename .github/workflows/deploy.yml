@@ -18,10 +18,10 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build Docker image
-        run: docker build -t fondasikehidupan:latest .
+        run: docker build -t backend:latest .
 
       - name: Save Docker image to file
-        run: docker save fondasikehidupan:latest -o fondasikehidupan.tar
+        run: docker save backend:latest -o backend.tar
 
       - name: Create .env file from secrets
         run: |
@@ -49,8 +49,8 @@ jobs:
 
       - name: Prepare deploy files
         run: |
-          mkdir fondasikehidupan
-          mv fondasikehidupan.tar .env docker-compose.yml fondasikehidupan/
+          mkdir backend
+          mv backend.tar .env docker-compose.yml backend/
 
       - name: Copy Docker image to server via SCP
         uses: appleboy/scp-action@v0.1.4
@@ -58,7 +58,7 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
-          source: "fondasikehidupan/*"
+          source: "backend/*"
           target: "~/"
 
       - name: Deploy container on server via SSH
@@ -68,12 +68,12 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            cd ~/fondasikehidupan
+            cd ~/backend
             
-            docker-compose down || true
-            docker rmi fondasikehidupan:latest || true
+            docker compose down || true
+            docker rmi backend:latest || true
 
-            docker load -i fondasikehidupan.tar
-            rm fondasikehidupan.tar
+            docker load -i backend.tar
+            rm backend.tar
 
-            docker-compose up -d
+            docker compose up -d

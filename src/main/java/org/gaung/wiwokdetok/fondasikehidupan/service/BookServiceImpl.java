@@ -2,6 +2,7 @@ package org.gaung.wiwokdetok.fondasikehidupan.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.gaung.wiwokdetok.fondasikehidupan.client.SearchServiceClient;
 import org.gaung.wiwokdetok.fondasikehidupan.dto.AmqpBookMessage;
 import org.gaung.wiwokdetok.fondasikehidupan.dto.AmqpUserBookViewMessage;
 import org.gaung.wiwokdetok.fondasikehidupan.dto.AmqpUserPointsMessage;
@@ -57,6 +58,8 @@ public class BookServiceImpl implements BookService {
     private final BookSummaryDTOMapper bookSummaryDTOMapper;
 
     private final UserActivityPublisher userActivityPublisher;
+
+    private final SearchServiceClient searchServiceClient;
 
     @Value("${application.base-url}")
     private String applicationBaseUrl;
@@ -140,7 +143,12 @@ public class BookServiceImpl implements BookService {
     public List<BookSummaryDTO> advancedSearch(String keyword, int limit) {
         Pageable pageable = PageRequest.of(0, limit);
         List<BookAuthorGenreProjection> rows = bookRepository.advancedSearch(keyword, pageable);
-        return  bookSummaryDTOMapper.groupFromProjections(rows);
+        return bookSummaryDTOMapper.groupFromProjections(rows);
+    }
+
+    @Override
+    public List<BookSummaryDTO> semanticSearch(String query, int limit, double threshold) {
+        return searchServiceClient.semanticSearch(query, limit, threshold);
     }
 
     @Override

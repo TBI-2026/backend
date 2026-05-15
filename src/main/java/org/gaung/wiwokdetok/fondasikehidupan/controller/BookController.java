@@ -85,11 +85,27 @@ public class BookController {
             path = "/books",
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<WebResponse<List<BookSummaryDTO>>> advancedSearch(
-            @RequestParam() String k,
-            @RequestParam(required = false) Integer limit) {
+    public ResponseEntity<WebResponse<List<BookSummaryDTO>>> search(
+            @RequestParam(required = false) String k,
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) Integer limit,
+            @RequestParam(required = false) Double threshold) {
 
         int effectiveLimit = (limit == null || limit <= 0) ? 5 : limit;
+
+        if (q != null && !q.isBlank()) {
+            double effectiveThreshold = (threshold == null) ? 0.0 : threshold;
+            return ResponseEntity.ok(WebResponse.<List<BookSummaryDTO>>builder()
+                    .data(bookService.semanticSearch(q, effectiveLimit, effectiveThreshold))
+                    .build());
+        }
+
+        if (k == null || k.isBlank()) {
+            return ResponseEntity.badRequest().body(
+                    WebResponse.<List<BookSummaryDTO>>builder()
+                            .errors("Provide either 'k' (keyword) or 'q' (semantic) search parameter")
+                            .build());
+        }
 
         return ResponseEntity.ok(WebResponse.<List<BookSummaryDTO>>builder()
                 .data(bookService.advancedSearch(k, effectiveLimit))

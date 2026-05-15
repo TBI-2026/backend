@@ -16,5 +16,7 @@ public interface BookService {
 
     List<BookSummaryDTO> advancedSearch(String keyword, int limit);
 
+    List<BookSummaryDTO> semanticSearch(String query, int limit, double threshold);
+
     void updateBook(UUID bookId, UpdateBookRequest request);
 }
